@@ -1,0 +1,19 @@
+
+
+originとは
+リモートリポジトリのアクセス先に対してGitがデフォルトでつける名前です。
+
+
+
+リモートリポジトリのアクセス先の設定
+
+$ git remote -v
+origin  https://github.com/kengoiida/pubrepo.git (fetch)
+origin  https://github.com/kengoiida/pubrepo.git (push)
+
+originという名前で定義されている
+
+
+ローカルのブランチ名を変更する
+$ git branch -m hoge fuga
+

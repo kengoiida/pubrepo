@@ -1,0 +1,10 @@
+
+
+git config --global --edit
+
+
+# ~/.gitconfig‚É’Ç‹L‚³‚ê‚é
+$ git config --global user.name "your name"
+$ git config --global user.email "your mail address"
+$ git config --global fetch.prune true
+
