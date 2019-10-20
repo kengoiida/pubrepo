@@ -1,0 +1,30 @@
+
+リモートリポジトリで自分の手元のローカルリポジトリの変更履歴を共有するには、ローカルリポジトリ内の変更履歴をアップロードする必要があります。
+
+そのために、Gitではプッシュ(Push)という操作を行います。 Pushを実行すると、リモートリポジトリに自分の変更履歴がアップロードされて、リモートリポジトリ内の変更履歴がローカルリポジトリの変更履歴と同じ状態になります。
+
+
+
+
+git remote add origin プッシュするURL
+
+
+
+■サンプル
+$ git push origin macbook
+Enumerating objects: 4, done.
+Counting objects: 100% (4/4), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 285 bytes | 285.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+remote: 
+remote: Create a pull request for 'macbook' on GitHub by visiting:
+remote:      https://github.com/kengoiida/pubrepo/pull/new/macbook
+remote: 
+To https://github.com/kengoiida/pubrepo.git
+ * [new branch]      macbook -> macbook
+$ git branch
+* macbook
+$ 
+

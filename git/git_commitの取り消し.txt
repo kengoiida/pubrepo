@@ -1,0 +1,11 @@
+$ git reset --hard HEAD^
+$ git reset --hard HEAD^^
+$ git reset --hard HEAD^^^
+
+
+
+上書き
+$ git commit --amend
+直前のコミットに上書きをします。
+
+
