@@ -174,3 +174,196 @@ to read about a specific subcommand or concept.
 See 'git help git' for an overview of the system.
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+====================================================================================
+which git
+git --version
+git init
+git remote add origin https://github.com/kengoiida/pubrepo.git
+git push -u origin master
+git branch thinkpad
+git clone https://github.com/kengoiida/pubrepo.git
+cd .git/
+git log --oneline
+git config
+git add vscode
+git add .
+git add README.md
+git status
+git reset .
+git status
+git add vscode
+git config --global core.autoCRLF false
+git add vscode
+git status
+git --help
+git ls-files --stage
+git reset .
+git status
+git add adminScript/bin/ctrl_mqm.ksh
+git ls-files --stage
+git commit --global user.name "kengoiida"
+git status
+git commit adminScript/bin/ctrl_mqm.ksh
+history | grep git
+git config
+git config --global --edit
+git config --global --edit
+vi C:/usr/cygwin64/home/kiida/.gitconfig
+git config core.autocrlf
+git config name
+git config --list
+git config --global --list
+git config --system --list
+git config --global user.name "kiida"
+git config --global user.name "KENGO IIDA"
+git config --global user.email kiida@ait.co.jp
+git config --global --list[A
+git config --global user.name "kiida"
+git config --global -l
+git commit adminScript/bin/ctrl_mqm.ksh
+git config --system --listq
+git status
+git commit -m adminScript/bin/ctrl_mqm.ksh
+git status
+git commit -m adminScript/bin/ctrl_mqm.ksh
+git status
+git push
+git add adminScript/bin/ctrl_mqm.ksh
+git commit -m "first commit"
+git add adminScript/bin/ctrl_mqm.ksh
+git status
+git add adminScript/bin/ctrl_mqm.ksh
+git status
+git commit -m "first commit"
+git status
+git add adminScript/bin/ctrl_mqchl.ksh
+git status
+git commit -m "first commit"
+git status
+git remote add origin https://github.com/kengoiida/pubrepo.git
+git branch
+git push master
+git push origin master
+git push pubrepo master
+git status
+git config
+git config --list
+git log
+git remote add origin https://github.com/kengoiida/pubrepo.git
+git remote rm origin
+git remote add origin https://github.com/kengoiida/pubrepo.git
+git config --list
+history | grep git
+git config -l
+which git
+git remote add origin https://github.com/kengoiida/pubrepo.git
+git status
+git status
+which git
+ls -l /cygdrive/c/usr/PortableGit/cmd/git
+ls -l /cygdrive/c/usr/PortableGit/cmd/git/
+git status
+git add git/git_push.txt
+git commit -m "thinkpad commit"
+git add git/git_push2.txt
+git commit -m "thinkpad commit"
+git status
+git add git/git_push2.txt
+git checkout
+git add git/git_push2.txt
+git status
+git checkout
+git status
+git reset HEAD .
+git status
+git reset --hard HEAD^
+git status
+git add git/git_push2.txt
+git add git/git_push2.txt
+git status
+git rm git/git_push.txt
+git status
+git push origin thinkpad
+git config -l
+git config -l
+git status
+git push origin thinkpad
+git status
+git config -l
+history | grep git | grep rm
+git push origin thinkpad
+git remote -v
+git remote set-url origin https://kengoiida:Zaq12wsx@github.com/kengoiida/pubrepo.git
+git remote -v
+git push origin thinkpad
+git remote add origin https://github.com/kengoiida/pubrepo/thinkpad.git
+git remote -v
+git remote -v
+git remote set-url origin https://kengoiida:pppoooiii000@github.com/kengoiida/pubrepo.git
+git remote -v
+git push origin thinkpad
+git status
+ls -l git
+git add git/git*
+git commit -m "thinkpad commit"
+git status
+git add git
+git status
+git commit -m "thinkpad commit"
+git status
+git push origin macbook
+git branch
+git branch -m thinkpad master
+git branch
+git commit -m "thinkpad commit"
+git push origin master
+git push origin macbook
+git commit -m "thinkpad commit"
+git remote show
+git fetch macbook
+git fetch pubrepo/macbook
+git remote show
+git remote show
+git fetch master
+git fetch master
+git remote show
+git branch
+git branch -m master thinkpad
+git branch
+git remote show
+git branch -r
+git fetch thinkapd
+git branch
+git push origin thinkapd
+git push origin master
+git push origin thinkapd
+git push -u origin thinkapd
+git status
+git add git
+git status
+git commit -a -m 'add xxx.'
+git push -u origin thinkpad
+git branch -r
+git branch
+git remote show
+git fetch origin
+git remote show
+git branch -r
+
