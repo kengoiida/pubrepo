@@ -1,0 +1,23 @@
+
+
+git push origin ローカル:リモート
+git push origin master:master
+
+
+
+git status
+git add git
+git status
+git commit -a -m 'add xxx.'
+git push -u origin thinkpad
+
+
+
+
+
+
+git remote add origin プッシュするURL
+
+
+
+

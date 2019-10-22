@@ -1,0 +1,67 @@
+
+■リポジトリ
+
+https://www.sejuku.net/blog/71492
+
+originとは
+リモートリポジトリのアクセス先に対してGitがデフォルトでつける名前です。
+
+
+
+
+git remote add リポジトリ名 リポジトリURL                       リモートリポジトリの認識
+git remote rm リポジトリ名                                      認識を削除（リモートは消えない）
+
+
+$ git remote -v
+origin  https://github.com/kengoiida/pubrepo.git (fetch)
+origin  https://github.com/kengoiida/pubrepo.git (push)
+
+originという名前で定義されている
+
+
+git remote set-url origin [変更先のURL]             URLを変更
+
+
+
+
+
+リポジトリ名を変更
+git remote rename [変更前リポジトリ名] [変更後リポジトリ名]
+
+
+
+
+■ブランチ
+
+
+統合ブランチ（メインになる）
+トピックブランチ（統合から分岐したブランチで一時的に使用するもの。バグ修正など）
+
+
+最初に作成されるブランチは master と名付けられる。
+
+
+git branch
+git branch -r       リモート
+
+
+git checkout ブランチ名                 ブランチの切り替え
+git checkout -                          一個前のブランチへ切り替え
+git branch -m 変更前 変更前             ローカルのブランチ名を変更する
+
+git marge --no-ff ブランチ名            トピックブランチを統合ブランチに取り込む
+git branch -d <branchname>              ブランチの削除
+
+
+例：
+    ファイル変更後
+    git add ...
+    git commit -m "***"
+    git status
+    git checkout master
+    git git marge --no-ff トピックブランチ
+
+
+
+■マージ競合の解決
