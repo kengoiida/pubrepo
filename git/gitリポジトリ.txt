@@ -1,4 +1,5 @@
 
+https://www.sejuku.net/blog/71492
 
 originとは
 リモートリポジトリのアクセス先に対してGitがデフォルトでつける名前です。
@@ -16,4 +17,14 @@ originという名前で定義されている
 
 ローカルのブランチ名を変更する
 $ git branch -m hoge fuga
+
+
+
+URLを変更
+git remote set-url origin [変更先のURL]
+
+
+
+リポジトリ名を変更
+git remote rename [変更前リポジトリ名] [変更後リポジトリ名]
 

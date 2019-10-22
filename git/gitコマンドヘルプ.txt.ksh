@@ -72,6 +72,9 @@ git merge origin/branch_name            リモートリポジトリの変更をマージ
 git clone git@XXXXXX.git                リモートリポジトリをローカルにコピー
 
 
+
+
+
 git init
 git add README.md
 git commit -m "first commit"
@@ -100,6 +103,17 @@ git push -u origin master
 …or push an existing repository from the command line
 git remote add origin https://github.com/kengoiida/pubrepo.git
 git push -u origin master
+
+
+
+
+$ git remote -v
+origin  https://kiida:Zaq12wsx@github.com/kengoiida/pubrepo.git (fetch)
+origin  https://kiida:Zaq12wsx@github.com/kengoiida/pubrepo.git (push)
+[kiida@arouseneuron:workspace]$ git remote set-url origin https://kengoiida:Zaq12wsx@github.com/kengoiida/pubrepo.git
+[kiida@arouseneuron:workspace]$ git remote -v
+origin  https://kengoiida:Zaq12wsx@github.com/kengoiida/pubrepo.git (fetch)
+origin  https://kengoiida:Zaq12wsx@github.com/kengoiida/pubrepo.git (push)
 
 
 
