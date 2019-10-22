@@ -5,6 +5,7 @@ https://qiita.com/KosukeQiita/items/cf39d2922b77ac93f51d
 git remote add origin https://github.com/kengoiida/pubrepo.git
 
 
+
 git add adminScript/bin/ctrl_mqm.ksh
 git status
 git commit -m "commit2"
