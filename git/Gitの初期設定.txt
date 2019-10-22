@@ -1,4 +1,22 @@
 
+0. ‘O€”õ
+https://backlog.com/ja/git-tutorial/stepup/06/
+
+$ mkdir tutorial
+$ cd tutorial
+$ git init
+$ git add myfile.txt
+$ git commit -m "first commit"
+
+
+1. ƒuƒ‰ƒ“ƒ`‚ğì¬‚·‚é
+$ git branch <branchname>
+
+
+$ git checkout <branchname>
+
+
+
 
 ¡
 
