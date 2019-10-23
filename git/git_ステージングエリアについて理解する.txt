@@ -1,0 +1,27 @@
+
+Gitのステージングエリア（インデックス）について理解する
+https://qiita.com/takuyanin/items/8d5226fd5834e6ebc564
+
+
+Gitのステージング領域の正体を探る
+
+ステージング領域とは何か？
+簡単に説明すると「次にコミットしたときにコンテンツとして登録されるもの」リストです。(別名「インデックス」ともいいます。) 
+
+
+場所：C:\datastore\workspace\.git\objects
+
+.git/index (インデックス)
+.git/objects/ (レポジトリのデータベース)
+という２種類の場所に書き込みが行われます。
+
+
+■表示（.git/indexを表示）
+$ git ls-files --stage
+100644 348929af5736b9f83a2addaa59412665d03a5197 0       vscode/.vscode/settings.json
+100644 7b15953a2860cd632d3e14f884a59c95d1bb558e 0       vscode/memo.txt
+100644 85a8b7905c327af9cd346a0162f1372750160709 0       vscode/settings.json.sample1.txt
+100644 f81642216ebd834f55d07fb62986b2674dc4c45d 0       vscode/settings.json.sample2.txt
+100644 337dc252ef580af61013d1cb5bbb69413b87e792 0       "vscode/settings.json\343\201\250\343\201\257.txt"
+
+

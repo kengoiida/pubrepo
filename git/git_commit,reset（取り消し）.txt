@@ -1,0 +1,20 @@
+
+
+
+上書き
+$ git commit --amend
+直前のコミットに上書きをします。
+
+
+
+
+
+■ファイル変更の取り消し
+
+$ git reset --hard HEAD        変更したファイルをリポジトリの内容に戻したい
+$ git reset --hard HEAD^        変更したファイルをリポジトリの内容に戻したい
+$ git reset --hard HEAD^^
+$ git reset --hard HEAD^^^
+
+※HEADはローカルリポジトリの状態を示す
+

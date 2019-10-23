@@ -1,0 +1,67 @@
+
+
+gitconfig の基本を理解する
+https://qiita.com/shionit/items/fb4a1a30538f8d335b35
+
+https://note.nkmk.me/git-config-setting/
+
+■設定ファイル
+.git/config
+
+
+
+■コマンド
+git config --edit
+
+git config core.autocrlf
+git config --list
+git config --local <name>
+git config --global <name>
+git config --system <name>
+
+
+git config --local -l
+git config --global -l
+git config --system -l
+
+
+■gitconfig の設定は3段階
+
+git の config 情報の設定は、3段階に分かれている。システム全体 system と、ユーザ全体 global と、対象リポジトリのみ local ですな。
+
+設定は、 system, global, local の順に読み込まれ、最後に読み込まれた設定で上書きされるため、よりスコープの狭い設定が有効になる。
+
+
+■
+git の導入ガイドで最初に設定しなさいと、よく書かている
+
+$ git config --global user.name "My Name"
+$ git config --global user.email myname@example.com
+
+
+■
+$ git config --list
+core.symlinks=false
+core.autocrlf=true
+color.diff=auto
+color.status=auto
+color.branch=auto
+color.interactive=true
+help.format=html
+http.sslcainfo=/ssl/certs/ca-bundle.crt
+diff.astextplain.textconv=astextplain
+rebase.autosquash=true
+filter.lfs.clean=git-lfs clean -- %f
+filter.lfs.smudge=git-lfs smudge --skip -- %f
+filter.lfs.process=git-lfs filter-process --skip
+filter.lfs.required=true
+credential.helper=helper-selector
+core.autocrlf=false
+core.repositoryformatversion=0
+core.filemode=false
+core.bare=false
+core.logallrefupdates=true
+core.symlinks=false
+core.ignorecase=true
+remote.origin.url=https://github.com/kengoiida/pubrepo.git
+remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
