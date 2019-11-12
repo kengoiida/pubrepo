@@ -1,0 +1,358 @@
+#!/bin/ksh
+################################################################################
+# 機能概要      : 共通関数定義
+# 実行仕様      : 各スクリプトにて読み込んで使用する
+# 読込ファイル  : None
+# 書込ファイル  : None
+# 戻り値        : None
+# 更新履歴      : 
+################################################################################
+# ------------------------------------------------------------------------------
+# ミドルウェアオブジェクト定義取得
+#           引数: [$1:HOSTNAME  $2:TYPE  $3:KEYWORD]
+#           戻値: [オブジェクト関連情報 OBJ1-OBJ9]
+# ------------------------------------------------------------------------------
+getObject() {
+(( ${DBG_FLG} )) && set -x
+
+    _HOSTNAME="$1"
+    _TYPE="$2"
+    _KEYWORD="$3"
+    _OBJ1=
+    _OBJ2=
+    _OBJ3=
+    _OBJ4=
+    _OBJ5=
+    _OBJ6=
+    _OBJ7=
+    _OBJ8=
+    _OBJ9=
+
+    checkFileExist ${G_SCR_ETC_HOME}/${G_SCR_MW_OBJECT}
+
+    _OBJECT_LINE=$(awk -F: '{ if($1 == "'$_HOSTNAME'" && $2 == "'$_TYPE'" && $3 == "'$_KEYWORD'" ){ print $0; exit }}' ${G_SCR_ETC_HOME}/${G_SCR_MW_OBJECT})
+
+    if [[ "$_OBJECT_LINE" = "" ]]; then
+        :
+        #getMessage "999009I";logWriter ${LOGFILE} "TARGET NOT FOUND!!!   HOSTNAME=$_HOSTNAME  TYPE=$_TYPE  KEYWORD=$_KEYWORD"
+    else
+        _OBJ1=$(echo "${_OBJECT_LINE}"|awk -F: '{ print $4 }')
+        _OBJ2=$(echo "${_OBJECT_LINE}"|awk -F: '{ print $5 }')
+        _OBJ3=$(echo "${_OBJECT_LINE}"|awk -F: '{ print $6 }'| sed "s/,/ /g")
+        _OBJ4=$(echo "${_OBJECT_LINE}"|awk -F: '{ print $7 }')
+        _OBJ5=$(echo "${_OBJECT_LINE}"|awk -F: '{ print $8 }'| sed "s/,/ /g")
+        _OBJ6=$(echo "${_OBJECT_LINE}"|awk -F: '{ print $9 }'| sed "s/,/ /g")
+        _OBJ7=$(echo "${_OBJECT_LINE}"|awk -F: '{ print $10 }'| sed "s/,/ /g")
+        _OBJ8=$(echo "${_OBJECT_LINE}"|awk -F: '{ print $11 }'| sed "s/,/ /g")
+        _OBJ9=$(echo "${_OBJECT_LINE}"|awk -F: '{ print $12 }'| sed "s/,/ /g")
+    fi
+}
+
+# ------------------------------------------------------------------------------
+# HA稼働状況取得    引数[]
+#                   戻値[]
+# ------------------------------------------------------------------------------
+getHAActiveNode() {
+(( ${DBG_FLG} )) && set -x
+    :
+    #return $?
+}
+
+# ------------------------------------------------------------------------------
+# DB2接続確認関数       引数[$1:DB名    $2:インスタンスオーナー名    $3:パスワード]
+#                       戻値[RC:接続結果のリターンコード(SQLCODE)]
+# 使用例: RC=0;checkDB2Conn SAMPLE db2inst1 password
+# ------------------------------------------------------------------------------
+checkDB2Conn() {
+(( ${DBG_FLG} )) && set -x
+
+    if [[ $(whoami) = root ]]; then
+        su - $2 -c "db2 -ec +o connect to $1 user $2 using $3" 1>/dev/null 2>&1
+    else
+        db2 -ec +o connect to $1 user $2 using $3 1>/dev/null 2>&1
+    fi
+    return $?
+}
+# ------------------------------------------------------------------------------
+# INSTANCE 情報取得   $1=インスタンス名
+# ------------------------------------------------------------------------------
+getInstInfo() {
+(( ${DBG_FLG} )) && set -x
+
+    # インスタンスホーム取得
+    INSTHOME=$(cat /etc/passwd | awk -F: '{ if($1 == "'$1'"){print $6}}')
+    if [[ "${INSTHOME}" = "" ]]; then
+        getMessage "OPE030W";logWriter ${LOGFILE} "$1 のホームディレクトリ${message}"
+        return 99
+    fi
+
+    # DB一覧取得
+    getObject ${HOSTNAME} ${MW_NAME:=DB2}_OBJ $1
+    DBNAMES=$_OBJ4
+
+}
+
+# ------------------------------------------------------------------------------
+# DB2 表スペース使用率監視      $1=表スペース名
+# ------------------------------------------------------------------------------
+watchDB2TableSpaceUsage() {
+(( ${DBG_FLG} )) && set -x
+    _target=$1
+
+    sql="SELECT TBSP_NAME,TBSP_UTILIZATION_PERCENT,TBSP_TYPE,TBSP_STATE from SYSIBMADM.MON_TBSP_UTILIZATION WHERE TBSP_TYPE = \'DMS\'"
+    # 表スペースの名前が指定されている場合は指定する。
+    if [[ "${_target}" != "" ]]; then
+        sql="$sql AND TBSP_NAME = \'$_target\'"
+    fi
+
+    su - "${inst}" -c "db2 -x $sql" | awk '{print $1,$2,$3}' | while read tbsp usage_p ts_type
+    do
+        mmode_tmp=${MSGMODE}
+        if [[ "${ts_type}" = "DMS" ]]; then
+            # 数値判定
+            _num=$(echo "${usage_p}" | awk '/^[0-9\.]+$/ {print}')
+            if [[ -z ${_num} ]]; then
+                getMessage "WD0052W";logWriter ${LOGFILE} "${dbname} 表スペース ${tbsp} の${message}"
+            else
+                if [[ ${usage_p} -gt ${limit_c} ]]; then
+                    getMessage "WD0051C"; checkDupMsg ${priority} "${dbname}_${tbsp}"; logWriter ${LOGFILE} "${dbname} 表スペース ${tbsp} ${message}${usage_p}%"
+                elif [[ ${usage_p} -gt ${limit_w} ]]; then
+                    getMessage "WD0051W"; checkDupMsg ${priority} "${dbname}_${tbsp}"; logWriter ${LOGFILE} "${dbname} 表スペース ${tbsp} ${message}${usage_p}%"
+                else
+                    getMessage "WD0051I"; checkDupMsg ${priority} "${dbname}_${tbsp}"; logWriter ${LOGFILE} "${dbname} 表スペース ${tbsp} ${message}${usage_p}%"
+                    :
+                fi
+            fi
+        fi
+
+        MSGMODE=${mmode_tmp}
+    done
+}
+
+# ------------------------------------------------------------------------------
+# DB2 表スペースステータス監視      $1=表スペース名
+# ------------------------------------------------------------------------------
+watchDB2TableSpaceStatus() {
+    _target=$1
+
+    sql="SELECT TBSP_NAME,TBSP_STATE,TBSP_TYPE from SYSIBMADM.MON_TBSP_UTILIZATION"
+    # 表スペースの名前が指定されている場合は指定する。
+    if [[ "${_target}" != "" ]]; then
+        sql="$sql WHERE TBSP_NAME = \'$_target\'"
+    fi
+
+    su - "${inst}" -c "db2 -x $sql" | awk '{print $1,$2}' | while read tbsp status
+    do
+        if [[ "${status}" = "NORMAL" ]]; then
+            getMessage "WD0092I";logWriter ${LOGFILE} "${dbname} ${tbsp} ${message}  ${status} "
+        else
+            getMessage "WD0092C";logWriter ${LOGFILE} "${dbname} ${tbsp} ${message}  ${status} "
+        fi
+    done
+}
+
+# ------------------------------------------------------------------------------
+# DB2 ロックアプリケーション監視    $1=DB名
+# ------------------------------------------------------------------------------
+watchDB2LockStatus() {
+(( ${DBG_FLG} )) && set -x
+    _dbname=$1
+
+    sql="LIST APPLICATIONS FOR DB $_dbname SHOW DETAIL"
+
+    APP_LIST=$(su - ${inst} -c "db2 $sql"| awk '$9=="ロック待機" {print $4}')
+    if [[ "${APP_LIST}" != "" ]]; then
+
+        sleep ${limit_w:=120}
+
+        for appid in ${APP_LIST}
+        do
+            appname=$(su - ${inst} -c "db2 -x $sql"| awk -v ID=${appid} '$4==ID && $9=="ロック待機" {print $2}')
+            if [[ "${appname}" != "" ]]; then
+                getMessage "WD0999W";logWriter ${LOGFILE} "${_dbname}でロックが発生しています。APPLICATION=${appname} ID=${appid}"
+                ###su - ${inst} -c "db2pd -db ${_dbname} -locks showlocks -transactions -applications -dynamic -file ${G_SCR_LOG_HOME}/db2pd_${_dbname}_lock_${DATE}.log"
+                RC=99
+            fi
+        done
+    else
+        #getMessage "WD0999I";logWriter ${LOGFILE} "${_dbname}で${limit_w}秒以上ロック状態のアプリケーションはありません。"
+        :
+    fi
+}
+# ------------------------------------------------------------------------------
+# DB2 接続アプリケーション比率監視    $1=DB名
+# ------------------------------------------------------------------------------
+watchDB2ConnectApps() {
+(( ${DBG_FLG} )) && set -x
+    _dbname=$1
+    maxval=${target}
+    
+    # 接続数指定が明示されていない場合は構成パラメータから取得する
+    if [[ "${maxval}" = "" ]]; then
+        sql="GET DB CFG FOR ${_dbname}"
+        maxval=$(su - ${inst} -c "db2 -x $sql" | grep "(MAXAPPLS)" | grep -v grep | awk -F\= '{print $2}'|sed 's/[()]/ /g'|awk '{print $2}')
+    fi
+
+    sql="LIST APPLICATIONS FOR DB ${_dbname}"
+    curval=$(su - ${inst} -c "db2 -x $sql"|grep "${_dbname}"|wc -l)
+    (( usage_p = 100 * ${curval} / ${maxval:=10} ))
+    if [[ ${usage_p} -gt $limit_c ]]; then
+        getMessage "WD0043C";logWriter ${LOGFILE} "${_dbname} データベース${message}${curval} (${usage_p}%)"
+    elif [[ ${usage_p} -gt ${limit_w} ]]; then
+        getMessage "WD0043W";logWriter ${LOGFILE} "${_dbname} データベース${message}${curval} (${usage_p}%)"
+    else
+        getMessage "WD0043I";logWriter ${LOGFILE} "${_dbname} データベース${message}${curval} (${usage_p}%)"
+    fi
+
+}
+
+# ------------------------------------------------------------------------------
+# TSM RC CHECK
+# ------------------------------------------------------------------------------
+checkTSMRC() {
+(( ${DBG_FLG} )) && set -x
+
+    case $RC in
+        0)
+            getMessage "BUJ001I";logWriter ${LOGFILE} "TSMで${message}"
+            ;;
+        4)
+            getMessage "BUJ002W";logWriter ${LOGFILE} "TSMで${message}  RC=$RC"
+            RC_WARN=$RC
+            ;;
+        8)
+            getMessage "BUJ003W";logWriter ${LOGFILE} "TSMで${message}  RC=$RC"
+            RC_WARN=$RC
+            ;;
+        *)
+            getMessage "BUJ009C";logWriter ${LOGFILE} "TSMで${message}  RC=$RC"
+            RC=99
+            ;;
+    esac
+}
+
+
+# ------------------------------------------------------------------------------
+# MQ Manager 情報
+# ------------------------------------------------------------------------------
+getMQMInfo() {
+(( ${DBG_FLG} )) && set -x
+    if [[ "$1" = "" ]]; then _mqsini="/var/mqm/mqs.ini"; fi
+    
+    MQMGRS=$(cat $_mqsini | sed -e 's/^ *//' | awk -F= '/^QueueManager:/,/^InstallationName/ {if($1 == "Name") {print $2}}'|tr '\n' ',')
+    ###ques=$(su - | sed -e 's/^ *//' | awk -F= '/^QueueManager:/,/^InstallationName/ {if($1 == "Name") {print $2}}'|tr '\n' ',')
+    ###chls=$(cat $_mqsini | sed -e 's/^ *//' | awk -F= '/^QueueManager:/,/^InstallationName/ {if($1 == "Name") {print $2}}'|tr '\n' ',')
+}
+
+# ------------------------------------------------------------------------------
+# MQ Manager Status 確認   $1: MQ Manager
+# ------------------------------------------------------------------------------
+getMQMStatus() {
+(( ${DBG_FLG} )) && set -x
+
+    if [[ "$1" = "" ]]; then
+        getMessage "SWC091C";logWriter ${LOGFILE} "MQ Manager${message}  RC=$RC"
+    else
+        mqm_status=$(su - ${MQMUSR} -c LANG=C dspmq -m "$1" | grep "STATUS(Running)" | awk '{print $1}')
+    fi
+}
+
+# ------------------------------------------------------------------------------
+# MQ Channel Status 確認   $1: MQ Manager  $2: Channel
+# ------------------------------------------------------------------------------
+getCHLStatus() {
+(( ${DBG_FLG} )) && set -x
+
+    MQ_EXEC_FILE="${G_SCR_TMP_HOME}/${SCR_NAME}_status_$2.tmp"
+    echo "dis chstatus($2)" > ${MQ_EXEC_FILE}
+
+    CHL_STATUS=$(su - ${MQMUSR:-"mqm"} -c "runmqsc $1 < ${MQ_EXEC_FILE}" | grep STATUS | awk -F\( '{print $3}' | awk -F\) '{print $1}')
+}
+
+# ------------------------------------------------------------------------------
+# MQ Object (Manager, Channel, Queue) Status 取得
+# ------------------------------------------------------------------------------
+watchMQStatus() {
+(( ${DBG_FLG} )) && set -x
+    for mqmgr in $(echo "${MQMGRS}" | sed "s/,/ /g")
+    do
+        WATCH_KIND=${MW_NAME}
+        
+        cat ${WATCH_LIST} |egrep "^${HOSTNAME}:|^COMMON:"|awk -F: '{ if($2 == "'$WATCH_KIND'" && $3 == "'$mqmgr'" ) {print $3}}'| while read wdtarget
+        do
+            if [[ "$wdtarget" = "" ]]; then
+                ###getMessage "WD0999I";logWriter ${LOGFILE} "MQ Manager $mqmgr は監視対象ではありません"
+                continue
+            fi
+
+            # MQ Manager Status 取得
+            getMQMStatus ${mqmgr}
+            if [[ "${mqm_status}" = "" ]]; then
+                getMessage "SWC059C";logWriter ${LOGFILE} "MQ Manager ${mqmgr} ${message}"; RC=99; continue
+            else
+                ###getMessage "SWC019I";logWriter ${LOGFILE} "MQ Manager ${mqmgr} ${message}"
+                :
+            fi
+
+            # MQ Object 取得
+            getObject ${HOSTNAME} ${MW_NAME}_OBJ ${mqmgr}
+            MQMUSR="$_OBJ1"    # MQ User
+            MQCHLS="$_OBJ2"    # MQ Channel
+            MQQUES="$_OBJ3"    # MQ Queue
+
+            # MQ Channel Status 取得
+            WATCH_KIND="MQM_CHANNEL"
+            for mqchl in $(echo "${MQCHLS}" | sed "s/,/ /g")
+            do
+                cat ${WATCH_LIST} |egrep "^${HOSTNAME}:|^COMMON:"|awk -F: '{ if($2 == "'$WATCH_KIND'" && $3 == "'$mqchl'" ) {print $3}}' |sed 's/\%//g' | read wdtarget
+                
+                if [[ "$wdtarget" = "" ]]; then
+                    getMessage "WD0999I";logWriter ${LOGFILE} "MQ Channel $mqchl は監視対象ではありません。"; continue
+                fi
+
+                getCHLStatus ${mqmgr} ${mqchl}
+                if [[ "${CHL_STATUS}" != "RUNNING" ]]; then
+                    getMessage "WD0999W";logWriter ${LOGFILE} "MQ Channel ${mqchl} は ${CHL_STATUS:-"STOP"} 状態です。"; RC=99 continue
+                else
+                    getMessage "WD0999I";logWriter ${LOGFILE} "MQ Channel ${mqchl} は ${CHL_STATUS} 状態です。"
+                fi
+            done
+
+            # LOCAL Q 件数確認
+            WATCH_KIND="MQM_QUEUE"
+            for queue in $(echo "${MQQUES}" | sed "s/,/ /g")
+            do
+                #WATCH_KIND="${WATCH_KIND}_$(echo ${queue} | awk '{print toupper($0)}')"
+                cat ${WATCH_LIST} |egrep "^${HOSTNAME}:|^COMMON:"|awk -F: '{ if($2 == "'$WATCH_KIND'" && $3 == "'$queue'" ) {print $4,$5}}' |sed 's/\%//g' | read limit_w limit_c
+                
+                if [[ "$limit_w" = "" ]] || [[ "$limit_c" = "" ]]; then
+                    getMessage "WD0999I";logWriter ${LOGFILE} "MQ Queue $queue は監視対象ではありません。"; continue
+                fi
+                
+                MQ_EXEC_FILE="${G_SCR_TMP_HOME}/${SCR_NAME}_qlocal_${queue}.tmp"
+                echo "dis qlocal(${queue})" > ${MQ_EXEC_FILE}
+
+                su - ${MQMUSR} -c "runmqsc ${mqmgr} < ${MQ_EXEC_FILE}" \
+                | grep MAXDEPTH | awk '{print $1}' | awk -F"MAXDEPTH" '{print $2}' \
+                | sed 's/[(|)]//g' | read maxval
+                if [[ "$maxval" = "" ]]; then getMessage "999009E";logWriter ${LOGFILE} "Queue=$queue MAX=${maxval:-'?'}"; continue; fi
+
+                su - ${MQMUSR} -c "runmqsc ${mqmgr} < ${MQ_EXEC_FILE}" \
+                | grep CURDEPTH | awk '{print $2}' | awk -F"CURDEPTH" '{print $2}' \
+                | sed 's/[(|)]//g' | read curval
+                if [[ "$curval" = "" ]]; then getMessage "999009E";logWriter ${LOGFILE} "Queue=$queue CURRENT=${curval:-'?'}"; continue; fi
+
+                (( usage_p = 100 * ${curval} / ${maxval} ))
+
+                if [[ ${usage_p} -gt ${limit_c} ]]; then
+                    getMessage "WD0055C";logWriter ${LOGFILE} "${mqmgr} Queue ${queue} ${message} COUNT=$curval 使用率=${usage_p}%"; RC=99
+                elif [[ ${usage_p} -gt ${limit_w} ]]; then
+                    getMessage "WD0055W";logWriter ${LOGFILE} "${mqmgr} Queue ${queue} ${message} COUNT=$curval 使用率=${usage_p}%"
+                else
+                    getMessage "WD0051I";logWriter ${LOGFILE} "${mqmgr} Queue ${queue} ${message} COUNT=$curval 使用率=${usage_p}%"
+                fi
+            done 
+        done
+    done
+}
+
